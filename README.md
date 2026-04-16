@@ -90,14 +90,23 @@ The `.claude/skills/` directory contains linked skills that give Claude Code dom
 
 Available MCP tools: `build`, `devserver_start/stop`, `test`, `modernize`, `e2e`, `list_projects`, `get_best_practices`, `search_documentation`, `ai_tutor`.
 
-## Getting Started
+## Getting Started (Cross-Platform)
 
-```bash
-npm install
-npm start        # ng serve  →  http://localhost:4200
-npm test         # vitest
-npm run build    # production build
-```
+Ensure you have Node installed. We recommend using a Node Version Manager:
+- macOS/Linux: [nvm](https://github.com/nvm-sh/nvm)
+- Windows: [nvm-windows](https://github.com/coreybutler/nvm-windows)
+
+1. In the root of the directory, load the proper Node version specified in `.nvmrc`:
+   ```bash
+   nvm use # or 'nvm install' if you don't have it yet
+   ```
+2. Install dependencies and start the app:
+   ```bash
+   npm install
+   npm start        # ng serve  →  http://localhost:4200
+   npm test         # vitest
+   npm run build    # production build
+   ```
 
 ## License
 

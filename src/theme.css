@@ -1,0 +1,44 @@
+/* 
+ * ==========================================
+ * SINGLE SOURCE OF TRUTH: THEME VARIABLES
+ * ==========================================
+ * 
+ * Este archivo centraliza la colorimetría completa 
+ * del sitio y sus tipografías. Es el SSOT (Single 
+ * Source of Truth) para todo el proyecto.
+ */
+
+@theme {
+  /*
+   * Tipografías
+   * Agrega o modifica aquí las fuentes globales del sitio.
+   */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+
+  /*
+   * Colorimetría del sitio
+   * Define aquí los colores de marca, estado y utilidades.
+   */
+  --color-primary: var(--color-blue-600);
+  --color-secondary: var(--color-slate-600);
+  --color-success: var(--color-emerald-500);
+  --color-warning: var(--color-amber-500);
+  --color-danger: var(--color-red-500);
+  --color-info: var(--color-blue-500);
+}
+
+/* 
+ * Variables Nativas de CSS
+ * Úsalas si necesitas variables reactivas no gestionadas por Tailwind
+ * o como base para los estilos puros.
+ */
+:root {
+  /* Fondo y texto base */
+  --bg-base: #ffffff;
+  --text-base: #1e293b;
+  
+  /* Ejemplo de tokens adicionales */
+  --border-radius-base: 0.375rem;
+  --transition-base: 150ms ease-in-out;
+}
