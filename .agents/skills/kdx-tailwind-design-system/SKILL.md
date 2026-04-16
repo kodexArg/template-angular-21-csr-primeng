@@ -240,19 +240,7 @@ Use when layout must respond to a **parent container's size**, not the viewport.
 
 ## QA Audit Rules
 
-Rules learned from production audits. Mandatory for all Tailwind extensions.
-
-### Gradient Badge Contrast — WCAG 1.4.11
-
-When creating gradient badges or gradient backgrounds with text/icons on top, verify the **lightest** color stop passes:
-- **>=3:1** contrast ratio for non-text elements (icons, borders)
-- **>=4.5:1** contrast ratio for normal text
-
-Use a contrast checker tool before shipping.
-
-### PrimeNG Variable Naming
-
-Always use the `--p-` prefix for PrimeNG CSS variables. Legacy unprefixed names (`--surface-ground`, `--primary-color-text`) must not appear in new code. The correct form is `var(--p-surface-ground)`, `var(--p-primary-color)`, etc.
+See `kdx-design-system-use` → QA Audit Rules for gradient contrast and CSS variable naming rules.
 
 ---
 

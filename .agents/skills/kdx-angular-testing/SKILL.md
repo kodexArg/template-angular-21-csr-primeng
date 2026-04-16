@@ -604,7 +604,7 @@ export const createUser = (overrides: Partial<User> = {}): User => ({
   ...overrides,
 });
 
-export const createDRFPage = <T>(results: T[], count?: number): DRFPaginated<T> => ({
+export const createPage = <T>(results: T[], count?: number): Paginated<T> => ({
   count: count ?? results.length,
   next: null,
   previous: null,

@@ -56,6 +56,14 @@ Every UI task follows this sequence. No exceptions.
 
 ---
 
+## Single Source of Truth (SSOT)
+
+- **`src/theme.css`** is the **Single Source of Truth (SSOT)** for the completely site's colorimetry, typography, and base CSS variables.
+- All new custom colors, typography tokens, or global design variables must be defined here.
+- Hardcoding colors outside of `src/theme.css` (e.g. raw `#hex`, `rgb`, or Tailwind colors) is prohibited. Before checking anywhere else for colors, check `src/theme.css`.
+
+---
+
 ## PrimeNG LLM Reference
 
 PrimeNG provides machine-readable documentation for LLMs:
@@ -424,7 +432,7 @@ For lists, add `@empty`:
 
 ## Prohibited Patterns
 
-These rules are enforced by `showcase.component.spec.ts` and apply to ALL components.
+Design-system rules enforced by `showcase.component.spec.ts`. Angular coding prohibitions live in `kdx-angular-component`.
 
 | Rule | Regex / Pattern | Fix |
 |---|---|---|
@@ -433,94 +441,6 @@ These rules are enforced by `showcase.component.spec.ts` and apply to ALL compon
 | No Tailwind dark mode | `dark:` | PrimeNG CSS vars auto-resolve |
 | No unprefixed custom classes | any non-standard class | Prefix with `kdx-*` |
 | No `::ng-deep` | anywhere | Use `[dt]` or `[pt]` |
-| No `*ngIf`, `*ngFor` | structural directives | Use `@if`, `@for` |
-| No `ngClass`, `ngStyle` | attribute directives | Use `[class.*]` or `[style.*]` |
-| No NgModule | `@NgModule` | Standalone only |
-| No constructor DI | `constructor(private ...)` | Use `inject()` |
-| No `@Input()`, `@Output()` | decorators | Use `input()`, `output()` |
-
----
-
-## Test Generation — Mandatory
-
-**Every component gets a test.** Both this skill and `kdx-angular-component` enforce this.
-
-### Test Template
-
-```typescript
-import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import { kdxThemeOptions } from '../theme.config'; // adjust path
-import { MyComponent } from './my.component';
-
-describe('MyComponent', () => {
-  let fixture: ComponentFixture<MyComponent>;
-  let el: HTMLElement;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MyComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideRouter([]),
-        provideAnimationsAsync(),
-        providePrimeNG(kdxThemeOptions),
-      ],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(MyComponent);
-    fixture.detectChanges();
-    el = fixture.nativeElement;
-  });
-
-  // ── Component ──────────────────────────────────────────────────────
-  it('should create', () => {
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  // ── PrimeNG components render ──────────────────────────────────────
-  it('should render expected PrimeNG components', () => {
-    // Add assertions for each PrimeNG component used:
-    // expect(el.querySelector('p-card')).toBeTruthy();
-    // expect(el.querySelector('p-button')).toBeTruthy();
-    // expect(el.querySelector('p-table')).toBeTruthy();
-  });
-
-  // ── Design system rule enforcement ─────────────────────────────────
-
-  function getOwnClassValues(): string {
-    const allEls = el.querySelectorAll('[class]');
-    const ownClasses: string[] = [];
-    allEls.forEach((node) => {
-      if (node.hasAttribute('data-pc-name') || node.hasAttribute('data-pc-section')) return;
-      ownClasses.push(node.getAttribute('class')!);
-    });
-    return ownClasses.join(' ');
-  }
-
-  it('should not contain raw Tailwind color classes', () => {
-    const forbidden = /\btext-(red|green|blue|emerald|slate|zinc|gray|neutral|stone|orange|amber|yellow|lime|teal|cyan|sky|indigo|violet|purple|fuchsia|pink|rose)-\d{3}\b/;
-    expect(getOwnClassValues()).not.toMatch(forbidden);
-  });
-
-  it('should not use dark: Tailwind variant', () => {
-    expect(getOwnClassValues()).not.toMatch(/\bdark:/);
-  });
-});
-```
-
-### What to test per component type
-
-| Component Type | Additional Tests |
-|---|---|
-| Page with table | Table renders, correct columns, row count |
-| Page with form | Float labels present, submit button state |
-| Page with toolbar | Toolbar renders, action buttons present |
-| Card layout | Grid structure, responsive classes |
-| Data fetching | Loading state, error state, resolved state |
 
 ---
 
@@ -531,12 +451,12 @@ After this skill decides WHAT to build, delegate HOW:
 | Concern | Delegate to |
 |---|---|
 | Component anatomy (OnPush, inject, host) | `kdx-angular-component` |
+| Test generation (template, QA assertions) | `kdx-angular-component` |
 | Signal state (signal, computed, effect) | `kdx-angular-signals` |
 | Forms (Signal Forms API, validation) | `kdx-angular-forms` |
-| HTTP (httpResource, interceptors, DRF) | `kdx-angular-http` |
+| HTTP (httpResource, interceptors) | `kdx-angular-http` |
 | Routing (lazy routes, guards, resolvers) | `kdx-angular-routing` |
 | New Tailwind tokens (@theme, @utility) | `kdx-tailwind-design-system` |
-| Modify design system itself (rare) | `kdx-design-system-modification` |
 
 ---
 

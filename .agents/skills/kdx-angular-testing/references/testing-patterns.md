@@ -180,10 +180,10 @@ describe('Counter with Harness', () => {
 });
 ```
 
-## Testing DRF Paginated Responses
+## Testing Paginated Paginated Responses
 
 ```typescript
-import { createDRFPage } from '../../test/factories';
+import { createPaginatedPage } from '../../test/factories';
 
 it('should render paginated table', () => {
   const users = [
@@ -192,7 +192,7 @@ it('should render paginated table', () => {
   ];
 
   httpMock.expectOne('/api/users/?page=1&page_size=20')
-    .flush(createDRFPage(users, 50));
+    .flush(createPaginatedPage(users, 50));
   fixture.detectChanges();
 
   const rows = fixture.nativeElement.querySelectorAll('p-table tbody tr');
@@ -201,14 +201,14 @@ it('should render paginated table', () => {
 
 it('should paginate on page change', () => {
   httpMock.expectOne('/api/users/?page=1&page_size=20')
-    .flush(createDRFPage([{ id: '1', name: 'Alice' }], 50));
+    .flush(createPaginatedPage([{ id: '1', name: 'Alice' }], 50));
   fixture.detectChanges();
 
   fixture.componentInstance.page.set(2);
   fixture.detectChanges();
 
   httpMock.expectOne('/api/users/?page=2&page_size=20')
-    .flush(createDRFPage([{ id: '21', name: 'Charlie' }], 50));
+    .flush(createPaginatedPage([{ id: '21', name: 'Charlie' }], 50));
   fixture.detectChanges();
 
   expect(fixture.nativeElement.textContent).toContain('Charlie');

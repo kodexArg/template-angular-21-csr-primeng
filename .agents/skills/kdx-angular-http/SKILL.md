@@ -1,14 +1,12 @@
 ---
 name: kdx-angular-http
-description: HTTP data fetching for Angular 21 with httpResource() and HttpClient against Django DRF on AppRunner. Interceptors, pagination, file upload to S3. No TanStack Query.
+description: HTTP data fetching for Angular 21 with httpResource() and HttpClient. Interceptors, pagination, file upload. No TanStack Query.
 ---
 
-# HTTP — Angular 21 + Django DRF on AppRunner
+# HTTP — Angular 21
 
 > **FIRST:** invoke `kdx-design-system-use` for any UI/template decisions when displaying fetched data.
 > This skill handles HOW to fetch data. Design system decisions come first.
-
-API base: Django REST Framework behind AWS AppRunner. Static/media via S3 + CloudFront.
 
 ## httpResource() — Primary Data Fetching
 
@@ -101,7 +99,6 @@ export class UserService {
 }
 ```
 
-Note: trailing slashes — Django DRF convention.
 
 ## Interceptors
 
@@ -167,10 +164,10 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-## DRF Paginated Response
+## Paginated Response
 
 ```typescript
-interface DRFPaginated<T> {
+interface Paginated<T> {
   count: number;
   next: string | null;
   previous: string | null;
@@ -200,7 +197,7 @@ export class UserList {
   page = signal(1);
   pageSize = signal(20);
 
-  usersResource = httpResource<DRFPaginated<User>>(() => ({
+  usersResource = httpResource<Paginated<User>>(() => ({
     url: '/api/users/',
     params: { page: this.page().toString(), page_size: this.pageSize().toString() },
   }));
@@ -211,7 +208,7 @@ export class UserList {
 }
 ```
 
-## File Upload to S3 via DRF
+## File Upload
 
 ```typescript
 import { HttpEventType } from '@angular/common/http';
@@ -268,7 +265,7 @@ export class Search {
     { initialValue: '' }
   );
 
-  results = httpResource<DRFPaginated<Result>>(() => {
+  results = httpResource<Paginated<Result>>(() => {
     const q = this.debouncedQuery();
     return q.length >= 2 ? { url: '/api/search/', params: { q } } : undefined;
   }, { defaultValue: { count: 0, next: null, previous: null, results: [] } });

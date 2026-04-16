@@ -9,6 +9,8 @@ description: Create Angular 21 standalone components with PrimeNG and signal-bas
 > This skill handles HOW to write the component. Design system decisions come first.
 > **ALWAYS** generate a test file alongside every component (see `kdx-design-system-use` → Test Generation).
 
+**100% Componentization rule:** every distinct UI unit must be its own standalone component. Never repeat raw HTML blocks across pages. If a pattern appears more than once, extract it. See `kdx-design-system-use` for WHAT to build; this skill covers HOW.
+
 Standalone by default. Always set `standalone: true` explicitly (Angular 21 infers it, but explicit is audit-friendly). Never use NgModule.
 
 ## Anatomy
@@ -214,22 +216,92 @@ export class Hero {}
 
 ## Styling
 
-**PrimeNG first. Tailwind only when PrimeNG has no answer.**
+PrimeNG props first (`severity`, `size`, `[dt]`). Tailwind for layout around components (`flex`, `gap-*`, `p-*`). Never raw palette colors (`text-blue-500`). `host: { class: '...' }` for host-element utilities.
 
-- Use PrimeNG component props (`severity`, `variant`, `size`) and token overrides (`[dt]`) before reaching for CSS classes.
-- Tailwind utilities are valid for layout *around and between* components (`flex`, `grid`, `gap-*`, `p-*`, `w-*`).
-- For color, always use PrimeNG CSS variables or `tailwindcss-primeui` semantic utilities (`text-primary`, `bg-surface-card`) — never raw Tailwind palette classes (`text-blue-500`, `bg-slate-100`).
-- `host: { class: '...' }` is the correct place for layout utilities on the component root element.
-
-See `docs/08-primeng.md` for the token system and `[dt]` overrides.
-See `docs/09-tailwind4.md` for color rules, dark mode, and what not to do.
-See `kdx-tailwind-design-system` for extending `@theme` and `@utility`.
+See `kdx-tailwind-design-system` for the full hierarchy, `@theme`, `@utility`, and color rules.
 
 ### Prohibited Patterns
 
-- Never `BehaviorSubject`, `NgRx`, or `NGXS` for state — use signals
-- Never `FormControl`, `FormGroup`, `ReactiveFormsModule`, or `[(ngModel)]` — use Signal Forms (`kdx-angular-forms`)
-- Never Jasmine or Jest — use Vitest (`kdx-angular-testing`)
+| What | Fix |
+|---|---|
+| `*ngIf`, `*ngFor` | Use `@if`, `@for` |
+| `ngClass`, `ngStyle` | Use `[class.*]` or `[style.*]` |
+| `@NgModule` | Standalone only |
+| `constructor(private ...)` DI | Use `inject()` |
+| `@Input()`, `@Output()` decorators | Use `input()`, `output()` |
+| `BehaviorSubject`, `NgRx`, `NGXS` | Use signals (`kdx-angular-signals`) |
+| `FormControl`, `ReactiveFormsModule`, `[(ngModel)]` | Use Signal Forms (`kdx-angular-forms`) |
+| Jasmine or Jest | Use Vitest (`kdx-angular-testing`) |
+
+---
+
+## Test Generation — Mandatory
+
+Every component gets a test alongside it. No exceptions.
+
+```typescript
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { providePrimeNG } from 'primeng/config';
+import { kdxThemeOptions } from '../theme.config';
+import { MyComponent } from './my.component';
+
+describe('MyComponent', () => {
+  let fixture: ComponentFixture<MyComponent>;
+  let el: HTMLElement;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [MyComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideAnimationsAsync(),
+        providePrimeNG(kdxThemeOptions),
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(MyComponent);
+    fixture.detectChanges();
+    el = fixture.nativeElement;
+  });
+
+  it('should create', () => {
+    expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should render expected PrimeNG components', () => {
+    // expect(el.querySelector('p-card')).toBeTruthy();
+  });
+
+  it('should not contain raw Tailwind color classes', () => {
+    const ownClasses = getOwnClassValues(el);
+    const forbidden = /\btext-(red|green|blue|emerald|slate|zinc|gray|neutral|stone|orange|amber|yellow|lime|teal|cyan|sky|indigo|violet|purple|fuchsia|pink|rose)-\d{3}\b/;
+    expect(ownClasses).not.toMatch(forbidden);
+  });
+
+  it('should not use dark: Tailwind variant', () => {
+    expect(getOwnClassValues(el)).not.toMatch(/\bdark:/);
+  });
+});
+
+function getOwnClassValues(el: HTMLElement): string {
+  const ownClasses: string[] = [];
+  el.querySelectorAll('[class]').forEach((node) => {
+    if (node.hasAttribute('data-pc-name') || node.hasAttribute('data-pc-section')) return;
+    ownClasses.push(node.getAttribute('class')!);
+  });
+  return ownClasses.join(' ');
+}
+```
+
+| Component Type | Additional Tests |
+|---|---|
+| Page with table | Table renders, correct columns, row count |
+| Page with form | Float labels present, submit button state |
+| Data fetching | Loading state, error state, resolved state |
 
 ---
 
@@ -273,11 +345,4 @@ Add `aria-hidden="true"` to all decorative PrimeIcon `<i>` elements (icons that 
 
 ### PrimeNG CSS Variable Names
 
-Always use PrimeNG variable names with the `--p-` prefix. Never use legacy unprefixed names:
-
-| Correct | Wrong (legacy) |
-|---|---|
-| `var(--p-primary-color)` | `var(--primary-color-text)` |
-| `var(--p-surface-ground)` | `var(--surface-ground)` |
-| `var(--p-surface-0)` | `var(--surface-card)` |
-| `var(--p-surface-200)` | `var(--surface-border)` |
+Always use `--p-` prefix. See `kdx-design-system-use` → QA Audit Rules for the full table.
